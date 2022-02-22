@@ -79,21 +79,11 @@ int main(void)
 	char selection;
 	string sConfigFile = "config.csv";
 	map<string, string> config_map = ProcessConfigData(sConfigFile);
-	string symbol = config_map["symbol"];
-	//cout << symbol;
-	vector<string> symbols = split(symbol, ',');
-	for (auto i = symbols.begin(); i != symbols.end(); ++i) {
-		cout << *i << endl;
-	}
-	//vector<string> symbols;
-	//symbols.push_back("MSFT");
-	//symbols.push_back("TWTR");
-	//symbols.push_back("IBM");
+
+
 	map<string, Stock> stockMap;
 	set<string> symbol1, symbol2;
-	string daily_symbol = "MCD";
-	string intraday_symbol = "AAPL";
-	string fakeSymbolTest = "IBM";
+
 	while (!bCompleted)
 	{   std::cout << endl;
 	    std::cout << "Menu" << endl;
