@@ -184,7 +184,8 @@ int main(void)
 			// symbol 1
 			for (auto i = symbol1.begin(); i != symbol1.end(); ++i) {
 				cout << *i;
-				Stock myStock(*i);
+				vector<TradeData> TradeDataVec;
+				Stock myStock(*i, TradeDataVec);
 				// do daily
 				string url_request = daily_url_common + *i + ".US?" + "from=" + start_date + "&to=" + end_date + "&api_token=" + api_token + "&period=d&fmt=json";
 				if (PullMarketData(url_request.c_str(), readBuffer) != 0)
@@ -200,7 +201,8 @@ int main(void)
 			// symbol 2
 			for (auto i = symbol2.begin(); i != symbol2.end(); ++i) {
 				cout << *i;
-				Stock myStock(*i);
+				vector<TradeData> TradeDataVec;
+				Stock myStock(*i, TradeDataVec);
 				// do daily
 				string url_request = daily_url_common + *i + ".US?" + "from=" + start_date + "&to=" + end_date + "&api_token=" + api_token + "&period=d&fmt=json";
 				if (PullMarketData(url_request.c_str(), readBuffer) != 0)
@@ -217,13 +219,13 @@ int main(void)
 			// pair one
 			for (auto j = symbol1.begin(); j != symbol1.end(); ++j) {
 				cout << *j;
-				const vector<DailyTrade> dailyTrades = stockMap[*j].GetDailyTrade();
+				const vector<TradeData> dailyTrades = stockMap[*j].GetTrades();
 				for (auto i = dailyTrades.begin(); i != dailyTrades.end(); ++i) {
 
 					cout << *i << endl;
 					cout << "Inserting daily data for a stock into table PairOnePrices ..." << endl << endl;
 					char sql_Insert[512];
-					sprintf_s(sql_Insert, "INSERT INTO PairOnePrices(symbol, date, open, high, low, close, adjusted_close, volume) VALUES(\"%s\", \"%s\", %f, %f, %f, %f, %f, %d)", (*j).c_str(), i->GetDate().c_str(), i->GetOpen(), i->GetHigh(), i->GetLow(), i->GetClose(), i->GetAdjustedClose(), i->GetVolume());
+					sprintf_s(sql_Insert, "INSERT INTO PairOnePrices(symbol, date, open, high, low, close, adjusted_close, volume) VALUES(\"%s\", \"%s\", %f, %f, %f, %f, %f, %d)", (*j).c_str(), i->GetDate().c_str(), i->GetOpen(), i->GetHigh(), i->GetLow(), i->GetClose(), i->GetAdjClose(), i->GetVolume());
 					if (ExecuteSQL(db, sql_Insert) == -1)
 						return -1;
 				}
@@ -231,13 +233,13 @@ int main(void)
 			// pair two
 			for (auto j = symbol2.begin(); j != symbol2.end(); ++j) {
 				cout << *j;
-				const vector<DailyTrade> dailyTrades = stockMap[*j].GetDailyTrade();
+				const vector<TradeData> dailyTrades = stockMap[*j].GetTrades();
 				for (auto i = dailyTrades.begin(); i != dailyTrades.end(); ++i) {
 
 					cout << *i << endl;
 					cout << "Inserting daily data for a stock into table PairTwoPrices ..." << endl << endl;
 					char sql_Insert[512];
-					sprintf_s(sql_Insert, "INSERT INTO PairTwoPrices(symbol, date, open, high, low, close, adjusted_close, volume) VALUES(\"%s\", \"%s\", %f, %f, %f, %f, %f, %d)", (*j).c_str(), i->GetDate().c_str(), i->GetOpen(), i->GetHigh(), i->GetLow(), i->GetClose(), i->GetAdjustedClose(), i->GetVolume());
+					sprintf_s(sql_Insert, "INSERT INTO PairTwoPrices(symbol, date, open, high, low, close, adjusted_close, volume) VALUES(\"%s\", \"%s\", %f, %f, %f, %f, %f, %d)", (*j).c_str(), i->GetDate().c_str(), i->GetOpen(), i->GetHigh(), i->GetLow(), i->GetClose(), i->GetAdjClose(), i->GetVolume());
 					if (ExecuteSQL(db, sql_Insert) == -1)
 						return -1;
 				}

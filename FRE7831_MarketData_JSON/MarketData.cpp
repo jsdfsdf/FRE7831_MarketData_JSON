@@ -5,7 +5,10 @@
 #include "Util.h"
 #include "json/json.h"
 #include "Stock.h"
-
+#include <map>
+#include <string>
+#include <vector>
+#include<fstream>
 class Stock;
 
 // every thing before decode json, target get buffer
@@ -87,8 +90,9 @@ int PopulateDailyTrades(const std::string& read_buffer,
 				close = (*itr)["close"].asFloat();
 				adjusted_close = (*itr)["adjusted_close"].asFloat();
 				volume = (*itr)["volume"].asInt64();
-				DailyTrade aTrade(date, open, high, low, close, adjusted_close, volume);
-				stock.addDailyTrade(aTrade);
+				//DailyTrade aTrade(date, open, high, low, close, adjusted_close, volume);
+				TradeData aTrade(date, open, high, low, close, adjusted_close, volume);
+				stock.addTrade(aTrade);
 				cout << aTrade << endl;
 
 			}
@@ -96,58 +100,4 @@ int PopulateDailyTrades(const std::string& read_buffer,
 }
 
 
-int PopulateIntradayTrades(const std::string& read_buffer,
-	Stock& stock, long start_date) {
 
-	//json parsing
-	Json::CharReaderBuilder builder;
-	Json::CharReader* reader = builder.newCharReader();
-	Json::Value root;   // will contains the root value after parsing.
-	string errors;
-
-	bool parsingSuccessful = reader->parse(read_buffer.c_str(), read_buffer.c_str() + read_buffer.size(), &root, &errors);
-	if (not parsingSuccessful)
-	{
-		// Report failures and their locations in the document.
-		cout << "Failed to parse JSON" << endl << read_buffer << errors << endl;
-		return -1;
-	}
-	else
-	{
-		cout << "\nSucess parsing json\n" << root << endl;
-	}
-
-	string date;
-	float open, high, low, close, adjusted_close;
-	long volume;
-	for (Json::Value::const_iterator itr = root.begin(); itr != root.end(); itr++)
-		{
-		 long trade_timestamp = (*itr)["timestamp"].asInt64();
-		 if (trade_timestamp <= start_date)
-		 continue;
-		 string datetime = (*itr)["datetime"].asString();
-		 size_t current, previous = 0;
-		 current = datetime.find(' ');
-		 date = datetime.substr(previous, current - previous);
-		 previous = current + 1;
-		 string temp = datetime.substr(previous, datetime.length() - current);
-		 previous = 0;
-		 current = temp.find(':');
-		 int hour = stoi(temp.substr(previous, current - previous));
-		 hour -= 5;// convert to local time
-		 previous = current + 1;
-		 string mins_second = temp.substr(previous, datetime.length() - current);
-		 string timestamp = to_string(hour) + ":" + mins_second;
-		 open = (*itr)["open"].asFloat();
-		 high = (*itr)["high"].asFloat();
-		 low = (*itr)["low"].asFloat();
-		 close = (*itr)["close"].asFloat();
-		 volume = (*itr)["volume"].asInt64();
-		 IntradayTrade aTrade(date.c_str(), timestamp.c_str(), open, high, low, close, volume);
-		 stock.addIntradayTrade(aTrade);
-		 cout << aTrade << endl;
-
-	}
-	return 0;
-
-};
