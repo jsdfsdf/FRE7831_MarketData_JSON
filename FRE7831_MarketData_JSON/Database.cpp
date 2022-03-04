@@ -101,6 +101,34 @@ int ShowTable(sqlite3* db, const char* sql_stmt)
 	return 0;
 }
 
+int GetVolFromDatabase(sqlite3* db, vector<double>& vols)
+{
+	vector<double> volalitities;
+	int rc = 0;
+	char* error = nullptr;
+	char** results = NULL;
+	int rows, columns;
+	const char* sql_stmt = "SELECT volatility FROM StockPairs";
+	sqlite3_get_table(db, sql_stmt, &results, &rows, &columns, &error);
+	if (rc)
+	{
+		std::cerr << "Error executing SQLite3 query: " << sqlite3_errmsg(db) << std::endl << std::endl;
+		sqlite3_free(error);
+		return -1;
+	}
+	else
+	{
+		for (int rowCtr = 1; rowCtr <= rows; ++rowCtr)
+		{
+			if (isalnum(results[rowCtr][0]))
+				volalitities.push_back(atof(results[rowCtr]));
+		}
+		vols = volalitities;
+	}
+	sqlite3_free_table(results);
+	return 0;
+}
+
 void CloseDatabase(sqlite3* db)
 {
 	sqlite3_close(db);

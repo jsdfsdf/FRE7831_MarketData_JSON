@@ -10,6 +10,7 @@
 #include <iostream>
 #include <sstream>
 #include <fstream>
+#include <algorithm>
 #include <set>
 
 
@@ -45,7 +46,7 @@ int optionA(const char* sql_CreateTable, string tableName) {
 		return -1;
 
 	// Drop the table if exists
-	cout << "Drop " << tableName << "if exists" << endl;
+	cout << "Drop " << tableName << " if exists" << endl;
 	string sql_DropaTable = "DROP TABLE IF EXISTS " + tableName;
 	if (DropTable(db, sql_DropaTable.c_str()) == -1)
 		return -1;
@@ -74,7 +75,7 @@ int main(void)
 {
 	sqlite3* db = NULL;
 	const char* dataBaseName = "PairTrading.db";
-	if (OpenDatabase(dataBaseName,db) != 0) return -1;
+	if (OpenDatabase(dataBaseName, db) != 0) return -1;
 	bool bCompleted = false;
 	char selection;
 	string sConfigFile = "config.csv";
@@ -83,15 +84,21 @@ int main(void)
 
 	map<string, Stock> stockMap;
 	set<string> symbol1, symbol2;
+	vector<string> symbolVec1, symbolVec2;
+	vector<StockPairPrices> AllPairs;
 
 	while (!bCompleted)
-	{   std::cout << endl;
-	    std::cout << "Menu" << endl;
+	{
+		std::cout << endl;
+		std::cout << "Menu" << endl;
 		std::cout << "========" << endl;
 		std::cout << "A - Create and Populate Pair Tables" << endl;
 		std::cout << "B - Retrieve and Populate Historical Data for each stock" << endl; // stock
 		std::cout << "C - Create PairPrices Table" << endl;
-		std::cout << "D - Calculate Violatility" << endl;
+		std::cout << "D - Calculate Volatility" << endl;
+		std::cout << "E - Back Test" << endl;
+		std::cout << "F - Calculate Profit and Loss for Each Pair" << endl;
+		std::cout << "G - Manual Testing" << endl;
 		std::cout << "H - Drop All the Tables" << endl;
 
 		std::cout << "X - Exit" << endl << endl;
@@ -121,7 +128,7 @@ int main(void)
 			ifstream myfile("PairTradingTest.txt");
 			string s;
 			int pairId = 1;
-			cout << "Inserting pair data  into table StockPairs ..." << endl << endl;
+			cout << "Inserting pair data into table StockPairs ..." << endl << endl;
 			while (getline(myfile, s))      //是逐行读取文件信息
 			{
 				cout << s << endl;
@@ -132,20 +139,22 @@ int main(void)
 					return -1;
 				symbol1.insert(symbols[0]);
 				symbol2.insert(symbols[1]);
+				symbolVec1.push_back(symbols[0]);
+				symbolVec2.push_back(symbols[1]);
 				pairId++;
 			}
 
 			sql_CreateTable = "CREATE TABLE IF NOT EXISTS PairOnePrices "
-							 "(symbol CHAR(20) NOT NULL,"
-							 "date CHAR(20) NOT NULL,"
-							 "open REAL NOT NULL,"
-							 "high REAL NOT NULL,"
-							 "low REAL NOT NULL,"
-							 "close REAL NOT NULL,"
-							 "adjusted_close REAL NOT NULL,"
-							 "Volume INT NOT NULL,"
-							 "PRIMARY KEY(symbol, date)"
-							 ");";
+				"(symbol CHAR(20) NOT NULL,"
+				"date CHAR(20) NOT NULL,"
+				"open REAL NOT NULL,"
+				"high REAL NOT NULL,"
+				"low REAL NOT NULL,"
+				"close REAL NOT NULL,"
+				"adjusted_close REAL NOT NULL,"
+				"Volume INT NOT NULL,"
+				"PRIMARY KEY(symbol, date)"
+				");";
 			resultNum = optionA(sql_CreateTable, "PairOnePrices");
 
 			if (resultNum != 1) {
@@ -244,7 +253,21 @@ int main(void)
 						return -1;
 				}
 			}
-
+			// Pop Data into stockPair
+			for (int i = 0; i < symbolVec1.size(); i++)
+			{
+				pair<string, string> aPair = { symbolVec1[i], symbolVec2[i] };
+				cout << symbolVec1[i] << ' ' << symbolVec2[i] << endl;
+				StockPairPrices stockPair = StockPairPrices(aPair);
+				for (int j = 0; j < stockMap[symbolVec1[i]].GetTrades().size(); j++)
+				{
+					PairPrice price = PairPrice(stockMap[symbolVec1[i]].GetTrades()[j].GetOpen(),
+						stockMap[symbolVec1[i]].GetTrades()[j].GetClose(), stockMap[symbolVec2[i]].GetTrades()[j].GetOpen(),
+						stockMap[symbolVec2[i]].GetTrades()[j].GetClose());
+					stockPair.SetDailyPairPrice(stockMap[symbolVec1[i]].GetTrades()[j].GetDate(), price);
+				}
+				AllPairs.push_back(stockPair);
+			}
 			break;
 		}
 		case "c"_hash:
@@ -272,7 +295,7 @@ int main(void)
 
 			// insert
 			char sql_Insert[512];
-			sprintf_s(sql_Insert,\
+			sprintf_s(sql_Insert, \
 				"INSERT INTO PairPrices "
 				"SELECT StockPairs.symbol1 AS symbol1, "
 				"StockPairs.symbol2 AS symbol2, "
@@ -294,16 +317,95 @@ int main(void)
 			break;
 		}
 		case "d"_hash:
-		case "D"_hash: 
+		case "D"_hash:
 		{
 			string back_test_start_date = "2022-01-05";
 			string calculate_volatility_for_pair = string("Update StockPairs SET volatility =")
-				 + "(SELECT(AVG((close1/close2)*(close1/close2)) - AVG(close1 / close2) * AVG(close1 / close2)) as variance "
-					 + "FROM PairPrices "
-				 + "WHERE StockPairs.symbol1 = PairPrices.symbol1 AND StockPairs.symbol2 = PairPrices.symbol2 AND PairPrices.date <= \'"
-				 + back_test_start_date + "\');";
+				+ "(SELECT(AVG((close1/close2)*(close1/close2)) - AVG(close1 / close2) * AVG(close1 / close2)) as variance "
+				+ "FROM PairPrices "
+				+ "WHERE StockPairs.symbol1 = PairPrices.symbol1 AND StockPairs.symbol2 = PairPrices.symbol2 AND PairPrices.date <= \'"
+				+ back_test_start_date + "\');";
 			if (ExecuteSQL(db, calculate_volatility_for_pair.c_str()) == -1)
 				return -1;
+			vector<double> vols;
+			if (GetVolFromDatabase(db, vols) == -1)
+				return -1;
+			for (int i = 0; i < vols.size(); i++)
+			{
+				AllPairs[i].SetVolatility(vols[i]);
+			}
+			break;
+		}
+		case "G"_hash:
+		case "g"_hash:
+		{
+			// Show avaliable pairs
+			std::cout << "Show avaliable pairs" << endl;
+			const char* sql_select = "SELECT id, symbol1, symbol2 FROM StockPairs";
+			if (ShowTable(db, sql_select) == -1)
+				return -1;
+			std::cout << "Enter the id of stock pairs: " << endl;
+			unsigned short pair_id;
+			std::cin >> pair_id;
+			pair_id -= 1;
+			if (pair_id > symbolVec1.size())
+			{
+				std::cout << "Pair id out of range, please reenter the pair id: " << endl;
+				return -1;
+			}
+			std::cout << symbolVec1[pair_id] << ' ' << symbolVec2[pair_id] << endl;
+			double vol_pair = AllPairs[pair_id].GetVolatility();
+			std::cout << "Volatility: " << vol_pair << endl;
+			double open1d2, open2d2, close1d1, close2d1, close1d2, close2d2, N2, ProfitLoss, k_pair;
+			int LongShort;
+			const double N1 = 10000.0;
+
+			std::cout << endl;
+			std::cout << "Choose k: ";
+			std::cin >> k_pair;
+			std::cout << endl;
+			std::cout << endl;
+
+			std::cout << "Enter Day 1 Close Prices: " << endl;
+			std::cout << "Enter Close Price for First Stock: ";
+			std::cin >> close1d1;
+			std::cout << "Enter Close Price for Second Stock: ";
+			std::cin >> close2d1;
+			std::cout << endl;
+			std::cout << endl;
+
+			std::cout << "Enter Day 2 Open Prices" << endl;
+			std::cout << "Enter Open Price for First Stock: ";
+			std::cin >> open1d2;
+			std::cout << "Enter Open Price for Second Stock: ";
+			std::cin >> open2d2;
+			std::cout << endl;
+			std::cout << endl;
+
+			std::cout << "Enter Day 2 Close Prices" << endl;
+			std::cout << "Enter Close Price for First Stock: ";
+			std::cin >> close1d2;
+			std::cout << "Enter Close Price for Second Stock: ";
+			std::cin >> close2d2;
+			std::cout << endl;
+
+			if (abs(close1d1 / close2d1 - open1d2 / open2d2) > (vol_pair * k_pair))
+				LongShort = -1;
+			else
+				LongShort = 1;
+			N2 = N1 * (open1d2 / open2d2);
+			ProfitLoss = (-LongShort * N1 * (open1d2 - close1d2)) + (LongShort * N2 * (open2d2 - close2d2));
+
+			std::cout << endl << "Simmulated Results" << endl;
+			if (LongShort == -1) {
+				std::cout << "Short Position Taken in First Stock: 10000 Shares" << endl;
+				std::cout << "Long Postion Taken in Second Stock: " << N2 << endl;
+			}
+			else {
+				std::cout << "Long Position Taken in First Stock: 10,000 Shares" << endl;
+				std::cout << "Short Postion Taken in Second Stock: " << N2 << " Shares" << endl;
+			}
+			std::cout << "The Profit and Loss is: " << ProfitLoss << endl;
 			break;
 		}
 		case "h"_hash:
@@ -323,7 +425,7 @@ int main(void)
 			break;
 		default:
 			cout << "unknown";
-//			break;
+			//			break;
 		}
 
 
