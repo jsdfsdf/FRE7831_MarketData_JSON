@@ -125,7 +125,7 @@ int main(void)
 				return resultNum;
 			}
 			// insert data from txt
-			ifstream myfile("PairTradingTest.txt");
+			ifstream myfile("PairTrading.txt");
 			string s;
 			int pairId = 1;
 			cout << "Inserting pair data into table StockPairs ..." << endl << endl;
