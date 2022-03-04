@@ -84,7 +84,8 @@ int PopulateDailyTrades(const std::string& read_buffer,
 		for (Json::Value::const_iterator itr = root.begin(); itr != root.end(); itr++)
 			{
 				date = (*itr)["date"].asString();
-				open = (*itr)["open"].asFloat();
+				//open = round((*itr)["open"].asFloat() * 100) / 100;
+				open = round((*itr)["open"].asFloat() * 100);
 				high = (*itr)["high"].asFloat();
 				low = (*itr)["low"].asFloat();
 				close = (*itr)["close"].asFloat();

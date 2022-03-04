@@ -103,7 +103,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;_MBCS;CURL_STATICLIB;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>..\3rd_party_lib\libcurl-vc16-x64-debug-static-ipv6-sspi-schannel\include;..\3rd_party_lib\sqlite-snapshot-201808271713;D:\FRE7831_MarketData_JSON\3rd_party_lib\json\jsoncpp-master\dist;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\3rd_party_lib\libcurl-vc16-x64-debug-static-ipv6-sspi-schannel\include;..\3rd_party_lib\sqlite-snapshot-201808271713;D:\own\NYU\class\7831 tangsong data\team project\FRE7831_MarketData_Lab\3rd_party_lib\json\jsoncpp-master\dist;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>/FS %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>

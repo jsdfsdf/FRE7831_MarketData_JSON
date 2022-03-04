@@ -125,7 +125,7 @@ int main(void)
 				return resultNum;
 			}
 			// insert data from txt
-			ifstream myfile("PairTrading.txt");
+			ifstream myfile("PairTradingTest.txt");
 			string s;
 			int pairId = 1;
 			cout << "Inserting pair data into table StockPairs ..." << endl << endl;
@@ -281,6 +281,8 @@ int main(void)
 				"close1 REAL NOT NULL,"
 				"open2 REAL NOT NULL,"
 				"close2 REAL NOT NULL,"
+				"adjusted_close1 REAL NOT NULL,"
+				"adjusted_close2 REAL NOT NULL,"
 				"profit_loss REAL NOT NULL," \
 				"PRIMARY KEY(symbol1, symbol2, date),"
 				"FOREIGN KEY(symbol1, date) REFERENCES PairOnePrices(symbol, date) ON DELETE CASCADE ON UPDATE CASCADE,"
@@ -293,17 +295,19 @@ int main(void)
 				return resultNum;
 			}
 
-			// insert
-			char sql_Insert[512];
+			 //insert
+			char sql_Insert[512 * 2];
 			sprintf_s(sql_Insert, \
 				"INSERT INTO PairPrices "
 				"SELECT StockPairs.symbol1 AS symbol1, "
 				"StockPairs.symbol2 AS symbol2, "
 				"PairOnePrices.date AS date, "
 				"PairOnePrices.open AS open1, "
-				"PairOnePrices.adjusted_close AS close1, "  // Use adjusted_close for historical data
+				"PairOnePrices.close AS close1, "  // Use adjusted_close for historical data
 				"PairTwoPrices.open AS open2, "
-				"PairTwoPrices.adjusted_close AS close2, "  // Use adjusted_close for historical data
+				"PairTwoPrices.close AS close2, "  // Use adjusted_close for historical data
+				"PairOnePrices.open AS adjusted_close1,"
+				"PairTwoPrices.open AS adjusted_close2,"
 				"0 AS profit_loss "
 				"FROM StockPairs, PairOnePrices, PairTwoPrices "
 				"WHERE (((StockPairs.symbol1 = PairOnePrices.symbol) "
@@ -319,12 +323,14 @@ int main(void)
 		case "d"_hash:
 		case "D"_hash:
 		{
-			string back_test_start_date = "2022-01-05";
+			string back_test_start_date = "2022-01-01";
 			string calculate_volatility_for_pair = string("Update StockPairs SET volatility =")
-				+ "(SELECT(AVG((close1/close2)*(close1/close2)) - AVG(close1 / close2) * AVG(close1 / close2)) as variance "
+				+ "(SELECT(AVG((adjusted_close1/adjusted_close2)*(adjusted_close1/adjusted_close2)) - AVG(adjusted_close1 / adjusted_close2) * AVG(adjusted_close1 / adjusted_close2)) as variance "
 				+ "FROM PairPrices "
 				+ "WHERE StockPairs.symbol1 = PairPrices.symbol1 AND StockPairs.symbol2 = PairPrices.symbol2 AND PairPrices.date <= \'"
 				+ back_test_start_date + "\');";
+
+
 			if (ExecuteSQL(db, calculate_volatility_for_pair.c_str()) == -1)
 				return -1;
 			vector<double> vols;
@@ -421,6 +427,10 @@ int main(void)
 
 		case "x"_hash:
 		case "X"_hash:
+
+			cout << round((37.9899) * 100) / 100;
+			cout << 37.98990;
+
 			bCompleted = true;
 			break;
 		default:
