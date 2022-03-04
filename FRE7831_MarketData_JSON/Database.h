@@ -10,5 +10,7 @@ int ExecuteSQL(sqlite3* db, const char* sql_stmt);
 
 int ShowTable(sqlite3* db, const char* sql_stmt);
 
+int GetVolFromDatabase(sqlite3* db, vector<double>& vols);
+
 void CloseDatabase(sqlite3* db);
 
