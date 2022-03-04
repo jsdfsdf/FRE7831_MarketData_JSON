@@ -306,8 +306,8 @@ int main(void)
 				"PairOnePrices.close AS close1, "  // Use adjusted_close for historical data
 				"PairTwoPrices.open AS open2, "
 				"PairTwoPrices.close AS close2, "  // Use adjusted_close for historical data
-				"PairOnePrices.open AS adjusted_close1,"
-				"PairTwoPrices.open AS adjusted_close2,"
+				"PairOnePrices.adjusted_close AS adjusted_close1,"
+				"PairTwoPrices.adjusted_close AS adjusted_close2,"
 				"0 AS profit_loss "
 				"FROM StockPairs, PairOnePrices, PairTwoPrices "
 				"WHERE (((StockPairs.symbol1 = PairOnePrices.symbol) "
