@@ -76,7 +76,7 @@ int PopulateDailyTrades(const std::string& read_buffer,
 	}
 	else
 	{
-		cout << "\nSucess parsing json\n" << root << endl;		}
+		cout << "\nSucess parsing json\n" << endl;		}
 	
 		string date;
 		float open, high, low, close, adjusted_close;
@@ -94,7 +94,7 @@ int PopulateDailyTrades(const std::string& read_buffer,
 				//DailyTrade aTrade(date, open, high, low, close, adjusted_close, volume);
 				TradeData aTrade(date, open, high, low, close, adjusted_close, volume);
 				stock.addTrade(aTrade);
-				cout << aTrade << endl;
+				//cout << aTrade << endl;
 
 			}
 		return 0;

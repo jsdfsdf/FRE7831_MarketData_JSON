@@ -148,12 +148,14 @@
   <ItemGroup>
     <ClCompile Include="..\3rd_party_lib\json\jsoncpp-master\dist\jsoncpp.cpp" />
     <ClCompile Include="..\3rd_party_lib\sqlite-snapshot-201808271713\sqlite3.c" />
+    <ClCompile Include="Calculation.cpp" />
     <ClCompile Include="Database.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Util.cpp" />
     <ClCompile Include="MarketData.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Calculation.h" />
     <ClInclude Include="Database.h" />
     <ClInclude Include="MarketData.h" />
     <ClInclude Include="Stock.h" />
