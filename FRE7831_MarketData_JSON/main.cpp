@@ -1,7 +1,7 @@
-﻿#include "Stock.h"
+#include "Stock.h"
 #include "MarketData.h"
 #include "Database.h"
-#include "Calculation.h"
+#include "calculation.h"
 #include "Util.h"
 #include <map>
 #include <string>
@@ -78,7 +78,7 @@ int main(void)
 	const char* dataBaseName = "PairTrading.db";
 	if (OpenDatabase(dataBaseName, db) != 0) return -1;
 	bool bCompleted = false;
-	char selection;
+	//char selection;
 	string sConfigFile = "config.csv";
 	string back_test_start_date = "2022-01-01";
 	map<string, string> config_map = ProcessConfigData(sConfigFile);
@@ -133,10 +133,10 @@ int main(void)
 			cout << "Inserting pair data into table StockPairs ..." << endl << endl;
 			while (getline(myfile, s))      //是逐行读取文件信息
 			{
-				//cout << s << endl;
+				cout << s << endl;
 				vector<string> symbols = split(s, ',');
 				char sql_Insert[512];
-				sprintf_s(sql_Insert, "INSERT INTO StockPairs(id, symbol1, symbol2, volatility, profit_loss) VALUES(%d, \"%s\", \"%s\", %f, %f)", pairId, symbols[0].c_str(), symbols[1].c_str(), 0, 0);
+				sprintf_s(sql_Insert, "INSERT INTO StockPairs(id, symbol1, symbol2, volatility, profit_loss) VALUES(%d, \"%s\", \"%s\", %f, %f)", pairId, symbols[0].c_str(), symbols[1].c_str(), 0.0, 0.0);
 				if (ExecuteSQL(db, sql_Insert) == -1)
 					return -1;
 				symbol1.insert(symbols[0]);
@@ -194,7 +194,7 @@ int main(void)
 			string api_token = config_map["api_token"];
 			// symbol 1
 			for (auto i = symbol1.begin(); i != symbol1.end(); ++i) {
-				// cout << *i;
+				cout << *i;
 				vector<TradeData> TradeDataVec;
 				Stock myStock(*i, TradeDataVec);
 				// do daily
@@ -211,7 +211,7 @@ int main(void)
 			}
 			// symbol 2
 			for (auto i = symbol2.begin(); i != symbol2.end(); ++i) {
-				// cout << *i;
+				cout << *i;
 				vector<TradeData> TradeDataVec;
 				Stock myStock(*i, TradeDataVec);
 				// do daily
@@ -229,12 +229,12 @@ int main(void)
 			// data
 			// pair one
 			for (auto j = symbol1.begin(); j != symbol1.end(); ++j) {
-				//cout << *j;
+				cout << *j;
 				const vector<TradeData> dailyTrades = stockMap[*j].GetTrades();
 				for (auto i = dailyTrades.begin(); i != dailyTrades.end(); ++i) {
 
-					//cout << *i << endl;
-					//cout << "Inserting daily data for a stock into table PairOnePrices ..." << endl << endl;
+					cout << *i << endl;
+					cout << "Inserting daily data for a stock into table PairOnePrices ..." << endl << endl;
 					char sql_Insert[512];
 					sprintf_s(sql_Insert, "INSERT INTO PairOnePrices(symbol, date, open, high, low, close, adjusted_close, volume) VALUES(\"%s\", \"%s\", %f, %f, %f, %f, %f, %d)", (*j).c_str(), i->GetDate().c_str(), i->GetOpen(), i->GetHigh(), i->GetLow(), i->GetClose(), i->GetAdjClose(), i->GetVolume());
 					if (ExecuteSQL(db, sql_Insert) == -1)
@@ -243,12 +243,12 @@ int main(void)
 			}
 			// pair two
 			for (auto j = symbol2.begin(); j != symbol2.end(); ++j) {
-				//cout << *j;
+				cout << *j;
 				const vector<TradeData> dailyTrades = stockMap[*j].GetTrades();
 				for (auto i = dailyTrades.begin(); i != dailyTrades.end(); ++i) {
 
-					//cout << *i << endl;
-					//cout << "Inserting daily data for a stock into table PairTwoPrices ..." << endl << endl;
+					cout << *i << endl;
+					cout << "Inserting daily data for a stock into table PairTwoPrices ..." << endl << endl;
 					char sql_Insert[512];
 					sprintf_s(sql_Insert, "INSERT INTO PairTwoPrices(symbol, date, open, high, low, close, adjusted_close, volume) VALUES(\"%s\", \"%s\", %f, %f, %f, %f, %f, %d)", (*j).c_str(), i->GetDate().c_str(), i->GetOpen(), i->GetHigh(), i->GetLow(), i->GetClose(), i->GetAdjClose(), i->GetVolume());
 					if (ExecuteSQL(db, sql_Insert) == -1)
@@ -260,6 +260,7 @@ int main(void)
 			{
 				pair<string, string> aPair = { symbolVec1[i], symbolVec2[i] };
 				StockPairPrices stockPair = StockPairPrices(aPair);
+				
 				AllPairs.push_back(stockPair);
 			}
 			break;
@@ -310,7 +311,7 @@ int main(void)
 				"ORDER BY symbol1, symbol2;");
 			if (ExecuteSQL(db, sql_Insert) == -1)
 				return -1;
-			for (auto & p : AllPairs)
+			for (auto& p : AllPairs)
 			{
 				string s1 = p.GetStockPair().first, s2 = p.GetStockPair().second;
 				string sql_stmt = "SELECT date, open1, close1, open2, close2 FROM PairPrices WHERE symbol1 =  " + s1 + " AND symbol2 = " + s2 + " AND date >=" + back_test_start_date + ";";
@@ -351,26 +352,32 @@ int main(void)
 		case "d"_hash:
 		case "D"_hash:
 		{
+			//string back_test_start_date = "2022-01-05";
 			string calculate_volatility_for_pair = string("Update StockPairs SET volatility =")
 				+ "(SELECT(AVG((adjusted_close1/adjusted_close2)*(adjusted_close1/ adjusted_close2)) - AVG(adjusted_close1/adjusted_close2)*AVG(adjusted_close1/adjusted_close2)) as variance "
 				+ "FROM PairPrices "
 				+ "WHERE StockPairs.symbol1 = PairPrices.symbol1 AND StockPairs.symbol2 = PairPrices.symbol2 AND PairPrices.date <= \'"
 				+ back_test_start_date + "\');";
-
 			if (ExecuteSQL(db, calculate_volatility_for_pair.c_str()) == -1)
 				return -1;
 			vector<double> vols;
 			if (GetVolFromDatabase(db, vols) == -1)
 				return -1;
 			for (int i = 0; i < vols.size(); i++)
-				AllPairs[i].SetVolatility(sqrt(vols[i]));
+			{
+				AllPairs[i].SetVolatility(vols[i]);
+			}
 			break;
 		}
-		case "E"_hash:
+
 		case "e"_hash:
+		case "E"_hash:
 		{
+			double kvalue=1.0;
+			cout << "Please input k: ";
+			cin >> kvalue;
 			cout << endl;
-			if (CalculateBackTest(db, AllPairs) != 0)
+			if (CalculateBackTest(db, AllPairs, kvalue) != 0)
 				return -1;
 
 			cout << "Retrieving Top values of table PairPrices ..." << endl;
@@ -380,6 +387,63 @@ int main(void)
 				return -1;
 			break;
 		}
+
+
+
+
+
+
+
+		case "f"_hash:
+		case "F"_hash:
+		{
+			string symbol_1;
+			string symbol_2;
+			//string back_test_start_date = "2022-01-05";
+			int rc = 0;
+			char* error = nullptr;
+			
+			for (vector<StockPairPrices>::iterator itr = AllPairs.begin(); itr != AllPairs.end(); itr++) {
+				symbol_1 = itr->GetStockPair().first;
+				symbol_2 = itr->GetStockPair().second;
+				double PNL = 0.0;
+				map<string, PairPrice> dailyPairPrices = itr->GetDailyPrices();
+
+				for (map< string, PairPrice>::iterator d_itr = dailyPairPrices.begin(); d_itr != dailyPairPrices.end(); d_itr++) {
+					if (d_itr->first < back_test_start_date)
+						continue;
+					PNL += d_itr->second.dProfitLoss;
+					
+					cout << "dProfitLoss: " << (d_itr->second.dProfitLoss) << endl;
+				};
+				cout << "pnl: " << PNL << endl;
+
+				cout << "Update Total PNl for Stock Pair" << symbol_1 << "," << symbol_2 << endl;
+				
+				char calculate_total_pnl[512];
+				sprintf(calculate_total_pnl, "Update StockPairs SET Profit_Loss = %f WHERE Symbol1 = \"%s\" AND Symbol2 = \"%s\";", PNL, symbol_1.c_str(), symbol_2.c_str());
+
+				rc = sqlite3_exec(db, calculate_total_pnl, NULL, NULL, &error);
+				if (rc)
+				{
+					cerr << "Error executing SQLite3 statement: " << sqlite3_errmsg(db) << endl << endl;
+					sqlite3_free(error);
+					return -1;
+				}
+				
+				
+			}
+
+
+
+
+
+
+			break;
+		}
+
+
+
 		case "G"_hash:
 		case "g"_hash:
 		{
@@ -465,10 +529,6 @@ int main(void)
 
 		case "x"_hash:
 		case "X"_hash:
-
-			cout << round((37.9899) * 100) / 100;
-			cout << 37.98990;
-
 			bCompleted = true;
 			break;
 		default:
@@ -479,5 +539,6 @@ int main(void)
 
 	}
 }
+
 
 
