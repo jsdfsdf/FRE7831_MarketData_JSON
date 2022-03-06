@@ -1,4 +1,5 @@
-﻿#pragma once//
+#pragma once
+//
 //  Calculation.hpp
 //  FRE7831_MarketData_JSON_MAC
 //
@@ -10,4 +11,4 @@
 #include "Database.h"
 #include "Stock.h"
 
-int CalculateBackTest(sqlite3* db, vector<StockPairPrices>& AllPairs);
+int CalculateBackTest(sqlite3* db, vector <StockPairPrices>& AllPairs,double Kvalue);
