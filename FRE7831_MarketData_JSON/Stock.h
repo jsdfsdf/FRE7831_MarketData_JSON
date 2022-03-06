@@ -7,34 +7,34 @@
 #include <utility>
 using namespace std;
 
-class TradeData 
+class TradeData
 {
 private:
-	string sDate;
-	double dOpen;
-	double dHigh;
-	double dLow;
-	double dClose;
-	double dAdjClose;
-	long lVolume;
+    string sDate;
+    double dOpen;
+    double dHigh;
+    double dLow;
+    double dClose;
+    double dAdjClose;
+    long lVolume;
 public:
-	TradeData() : sDate(""), dOpen(0), dClose(0), dHigh(0), dLow(0), dAdjClose(0), lVolume(0){}
-	TradeData(string sDate_, double dOpen_, double dHigh_, double dLow_, double dClose_, double dAdjClose_, long lVolume_):
-		sDate(sDate_), dOpen(round(dOpen_ * 100) / 100), dHigh(round(dHigh_ * 100) / 100), dLow(round(dLow_ * 100) / 100), dClose(round(dClose_ * 100) / 100), dAdjClose(round(dAdjClose_ * 100) / 100), lVolume(lVolume_){}
-    
-	TradeData(const TradeData & TradeData): sDate(TradeData.sDate), dOpen(TradeData.dOpen), dHigh(TradeData.dHigh), dLow(TradeData.dLow), dClose(TradeData.dClose), dAdjClose(TradeData.dAdjClose), lVolume(TradeData.lVolume)  {}
-	TradeData operator=(const TradeData & TradeData)
-	{
-		sDate = TradeData.sDate;
-		dOpen = TradeData.dOpen;
+    TradeData() : sDate(""), dOpen(0), dClose(0), dHigh(0), dLow(0), dAdjClose(0), lVolume(0) {}
+    TradeData(string sDate_, double dOpen_, double dHigh_, double dLow_, double dClose_, double dAdjClose_, long lVolume_) :
+        sDate(sDate_), dOpen(round(dOpen_ * 100) / 100), dHigh(round(dHigh_ * 100) / 100), dLow(round(dLow_ * 100) / 100), dClose(round(dClose_ * 100) / 100), dAdjClose(round(dAdjClose_ * 100) / 100), lVolume(lVolume_) {}
+
+    TradeData(const TradeData& TradeData) : sDate(TradeData.sDate), dOpen(TradeData.dOpen), dHigh(TradeData.dHigh), dLow(TradeData.dLow), dClose(TradeData.dClose), dAdjClose(TradeData.dAdjClose), lVolume(TradeData.lVolume) {}
+    TradeData operator=(const TradeData& TradeData)
+    {
+        sDate = TradeData.sDate;
+        dOpen = TradeData.dOpen;
         dHigh = TradeData.dHigh;
         dLow = TradeData.dLow;
         dClose = TradeData.dClose;
         dAdjClose = TradeData.dAdjClose;
         lVolume = TradeData.lVolume;
         return *this;
-	}
-	// Getter
+    }
+    // Getter
     string GetDate() const { return sDate; }
     double GetOpen() const { return dOpen; }
     double GetHigh() const { return dHigh; }
