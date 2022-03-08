@@ -71,7 +71,7 @@ int optionH(string tableName) {
 	return 0;
 }
 
-
+vector<StockPairPrices> AllPairs;
 int main(void)
 {
 	sqlite3* db = NULL;
@@ -361,6 +361,7 @@ int main(void)
 			if (ExecuteSQL(db, calculate_volatility_for_pair.c_str()) == -1)
 				return -1;
 			vector<double> vols;
+			AllPairs = getMyPairs(db);
 			if (GetVolFromDatabase(db, vols) == -1)
 				return -1;
 			for (int i = 0; i < vols.size(); i++)
@@ -377,12 +378,15 @@ int main(void)
 			cout << "Please input k: ";
 			cin >> kvalue;
 			cout << endl;
+			//vector<StockPairPrices> AllPairs = getMyPairs(db);
 			if (CalculateBackTest(db, AllPairs, kvalue) != 0)
 				return -1;
 
 			cout << "Retrieving Top values of table PairPrices ..." << endl;
 			cout << endl;
-			string sqlSelect = "SELECT * FROM PairPrices;";
+			string sqlSelect = "SELECT * FROM PairPrices where date >= \'" + back_test_start_date + "\';";
+
+
 			if (ShowTable(db, sqlSelect.c_str()) != 0)
 				return -1;
 			break;
@@ -402,10 +406,11 @@ int main(void)
 			//string back_test_start_date = "2022-01-05";
 			int rc = 0;
 			char* error = nullptr;
-			
+			//vector<StockPairPrices> AllPairs = getMyPairs(db);
 			for (vector<StockPairPrices>::iterator itr = AllPairs.begin(); itr != AllPairs.end(); itr++) {
 				symbol_1 = itr->GetStockPair().first;
 				symbol_2 = itr->GetStockPair().second;
+				cout << itr->GetVolatility();
 				double PNL = 0.0;
 				map<string, PairPrice> dailyPairPrices = itr->GetDailyPrices();
 

@@ -35,7 +35,8 @@ int CalculateBackTest(sqlite3* db, vector <StockPairPrices>& AllPairs,double Kva
         kPair = itr->GetK();
 
         string sqlSelect = string("SELECT symbol1, symbol2, date, open1, close1, open2, close2 FROM PairPrices ")
-            + "WHERE symbol1 = \'" + Stock1 + "\' AND symbol2 = \'" + Stock2 + "\';";
+            + "WHERE symbol1 = \'" + Stock1 + "\' AND symbol2 = \'" + Stock2 + "\' AND date >= \'"
+            + BackTestStartDate + "\';";
 
         rc = sqlite3_get_table(db, sqlSelect.c_str(), &results, &rows, &columns, &error);
         if (rc)

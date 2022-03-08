@@ -133,3 +133,36 @@ void CloseDatabase(sqlite3* db)
 {
 	sqlite3_close(db);
 }
+
+vector<StockPairPrices> getMyPairs(sqlite3* db)
+{
+	string sql_stmt = "select symbol1, symbol2 from StockPairs"; //PairPrices
+	int rc = 0;
+	char* error = nullptr;
+	char** results = NULL;
+	int rows, columns;
+	vector<StockPairPrices> pairInfo;
+	sqlite3_get_table(db, sql_stmt.c_str(), &results, &rows, &columns, &error);
+	// Display Table
+	for (int rowCtr = 1; rowCtr <= rows; ++rowCtr)
+	{
+		vector<string> curPair;
+		for (int colCtr = 0; colCtr < columns; ++colCtr)
+		{
+			// Determine Cell Position
+			int cellPosition = (rowCtr * columns) + colCtr;
+
+			// Display Cell Value
+			//std::cout.width(12);
+			//std::cout.setf(std::ios::left);
+			//std::cout << results[cellPosition] << " ";
+			curPair.push_back(results[cellPosition]);
+		}
+		pair<string, string> aPair = { curPair[0], curPair[1] };
+		StockPairPrices stockPair = StockPairPrices(aPair);
+		pairInfo.push_back(stockPair);
+
+	}
+	sqlite3_free_table(results);
+	return pairInfo;
+}
