@@ -3,7 +3,7 @@
 
 int CalculateBackTest(sqlite3* db, vector <StockPairPrices>& AllPairs,double Kvalue)
 {
-    string BackTestStartDate = "2022-01-04";
+    string BackTestStartDate = "2022-01-03";
     int rc = 0;
     char* error = nullptr;
 
