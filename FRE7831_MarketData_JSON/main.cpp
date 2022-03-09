@@ -392,12 +392,6 @@ int main(void)
 			break;
 		}
 
-
-
-
-
-
-
 		case "f"_hash:
 		case "F"_hash:
 		{
@@ -438,16 +432,8 @@ int main(void)
 				
 				
 			}
-
-
-
-
-
-
 			break;
 		}
-
-
 
 		case "G"_hash:
 		case "g"_hash:

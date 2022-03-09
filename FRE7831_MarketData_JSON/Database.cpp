@@ -1,6 +1,7 @@
 #include "Database.h"
 #include <iostream>
 #include <string>
+#include <cmath>
 
 int OpenDatabase(const char* database_name, sqlite3* & db)
 {
@@ -121,7 +122,7 @@ int GetVolFromDatabase(sqlite3* db, vector<double>& vols)
 		for (int rowCtr = 1; rowCtr <= rows; ++rowCtr)
 		{
 			if (isalnum(results[rowCtr][0]))
-				volalitities.push_back(atof(results[rowCtr]));
+				volalitities.push_back(sqrt(atof(results[rowCtr])));
 		}
 		vols = volalitities;
 	}

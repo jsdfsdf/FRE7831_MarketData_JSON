@@ -47,10 +47,10 @@
     <ClInclude Include="Database.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="MarketData.h">
+    <ClInclude Include="Calculation.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Calculation.h">
+    <ClInclude Include="MarketData.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
