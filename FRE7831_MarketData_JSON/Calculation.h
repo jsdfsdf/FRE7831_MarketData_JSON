@@ -1,14 +1,18 @@
 #pragma once
-//
-//  Calculation.hpp
-//  FRE7831_MarketData_JSON_MAC
-//
-//  Created by Ruolian Duan on 3/3/22.
-//  Copyright © 2022 NYU. All rights reserved.
-//
 
 #include <stdio.h>
 #include "Database.h"
 #include "Stock.h"
+#include <vector>
 
-int CalculateBackTest(sqlite3* db, vector <StockPairPrices>& AllPairs,double Kvalue);
+class calculation {
+private:
+	sqlite3* db;
+	vector <StockPairPrices>& AllPairs;
+	double Kvalue;
+public:
+	calculation(sqlite3* db_, vector <StockPairPrices>& AllPairs_, double Kvalue_):
+		db(db_),AllPairs(AllPairs_),Kvalue(Kvalue_){}
+	int CalculateBackTest();
+
+};
