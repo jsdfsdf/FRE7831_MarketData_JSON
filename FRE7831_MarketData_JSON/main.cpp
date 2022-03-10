@@ -378,7 +378,8 @@ int main(void)
 			cin >> kvalue;
 			cout << endl;
 			//vector<StockPairPrices> AllPairs = getMyPairs(db);
-			if (CalculateBackTest(db, AllPairs, kvalue) != 0)
+			calculation Calculation(db, AllPairs, kvalue);
+			if (Calculation.CalculateBackTest() != 0)
 				return -1;
 
 			cout << "Retrieving Top values of table PairPrices ..." << endl;
