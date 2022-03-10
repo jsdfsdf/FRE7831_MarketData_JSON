@@ -87,7 +87,6 @@ int main(void)
 	map<string, Stock> stockMap;
 	set<string> symbol1, symbol2;
 	vector<string> symbolVec1, symbolVec2;
-	vector<StockPairPrices> AllPairs;
 
 	while (!bCompleted)
 	{
@@ -445,15 +444,23 @@ int main(void)
 				return -1;
 			std::cout << "Enter the id of stock pairs: " << endl;
 			unsigned short pair_id;
+			vector<double> volatilities;
+			if (GetVolFromDatabase(db, volatilities) == -1)
+				return -1;
+
+			vector<StockPairPrices> myPairs = getMyPairs(db);
 			std::cin >> pair_id;
-			pair_id -= 1;
-			if (pair_id > symbolVec1.size())
+			pair_id = pair_id - 1;
+
+			cout << pair_id << endl;
+			cout << myPairs.size()<<endl;
+			if (pair_id >= myPairs.size())
 			{
 				std::cout << "Pair id out of range, please reenter the pair id: " << endl;
 				return -1;
 			}
-			std::cout << symbolVec1[pair_id] << ' ' << symbolVec2[pair_id] << endl;
-			double vol_pair = AllPairs[pair_id].GetVolatility();
+			std::cout << myPairs[pair_id].GetStockPair().first << ' ' << myPairs[pair_id].GetStockPair().second << endl;
+			double vol_pair = volatilities[pair_id];
 			std::cout << "Volatility: " << vol_pair << endl;
 			double open1d2, open2d2, close1d1, close2d1, close1d2, close2d2, N2, ProfitLoss, k_pair;
 			int LongShort;
