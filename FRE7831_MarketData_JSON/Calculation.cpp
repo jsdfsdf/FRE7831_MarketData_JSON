@@ -1,9 +1,10 @@
-#include "calculation.h"
+#include "Calculation.h"
 #include <cmath>
 
-int CalculateBackTest(sqlite3* db, vector <StockPairPrices>& AllPairs,double Kvalue)
+
+int calculation::CalculateBackTest()
 {
-    string BackTestStartDate = "2022-01-03";
+    string BackTestStartDate = "2022-01-01";
     int rc = 0;
     char* error = nullptr;
 
@@ -50,7 +51,7 @@ int CalculateBackTest(sqlite3* db, vector <StockPairPrices>& AllPairs,double Kva
             Close2d1 = stod(results[(1 * columns) + 6]);
             ProfitLoss = 0;
 
-            PairPrice aPair(stod(results[(1 * columns) + 3]), Close1d1, stod(results[(1 * columns) + 5]), Close2d1,0);
+            PairPrice aPair(stod(results[(1 * columns) + 3]), Close1d1, stod(results[(1 * columns) + 5]), Close2d1, 0);
 
             itr->SetDailyPairPrice(results[(1 * columns) + 2], aPair);
 
@@ -80,7 +81,7 @@ int CalculateBackTest(sqlite3* db, vector <StockPairPrices>& AllPairs,double Kva
                 //date = (itr->GetDailyPrices());
                 //
 
-                PairPrice aPair(Open1d2, Close1d2, Open2d2, Close2d2,0);
+                PairPrice aPair(Open1d2, Close1d2, Open2d2, Close2d2, 0);
 
                 itr->SetDailyPairPrice(results[(rowCtr * columns) + 2], aPair);
                 itr->UpdateProfitLoss(results[(rowCtr * columns) + 2], ProfitLoss);
