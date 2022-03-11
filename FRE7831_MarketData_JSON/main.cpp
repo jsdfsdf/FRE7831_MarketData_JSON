@@ -13,8 +13,8 @@
 #include <fstream>
 #include <algorithm>
 #include <set>
-
-
+#include <time.h>
+#include<thread>
 hash_t hash_(char const* str)
 {
 	hash_t ret{ basis };
@@ -130,6 +130,7 @@ int main(void)
 			ifstream myfile("PairTradingTest.txt");
 			string s;
 			int pairId = 1;
+
 			cout << "Inserting pair data into table StockPairs ..." << endl << endl;
 			while (getline(myfile, s))      //是逐行读取文件信息
 			{
@@ -145,6 +146,7 @@ int main(void)
 				symbolVec2.push_back(symbols[1]);
 				pairId++;
 			}
+
 
 			sql_CreateTable = "CREATE TABLE IF NOT EXISTS PairOnePrices "
 				"(symbol CHAR(20) NOT NULL,"
@@ -182,16 +184,25 @@ int main(void)
 
 			break;
 		}
+
+
 		case "b"_hash:
 		case "B"_hash:
 		{
 			//build a stock map
+			clock_t cStartClock;
 
 			string readBuffer, readBuffer_Intra;
 			string daily_url_common = config_map["daily_url_common"];
 			string start_date = config_map["start_date"];
 			string end_date = config_map["end_date"];
 			string api_token = config_map["api_token"];
+			//map<string, string> read_buffer_map;
+			//set<string> s(symbol1);
+			//s.insert(symbol2.begin(), symbol2.end());
+			cStartClock = clock();
+
+
 			// symbol 1
 			for (auto i = symbol1.begin(); i != symbol1.end(); ++i) {
 				cout << *i;
@@ -226,15 +237,20 @@ int main(void)
 				readBuffer.clear();
 				stockMap[*i] = myStock;
 			}
+			printf("Imported  records in %4.2f seconds\n", (clock() - cStartClock) / (double)CLOCKS_PER_SEC);
+
 			// data
 			// pair one
+			char* sErrMsg = nullptr;
+			cStartClock = clock();
+			sqlite3_exec(db, "BEGIN TRANSACTION", NULL, NULL, &sErrMsg);
 			for (auto j = symbol1.begin(); j != symbol1.end(); ++j) {
 				cout << *j;
 				const vector<TradeData> dailyTrades = stockMap[*j].GetTrades();
 				for (auto i = dailyTrades.begin(); i != dailyTrades.end(); ++i) {
 
-					cout << *i << endl;
-					cout << "Inserting daily data for a stock into table PairOnePrices ..." << endl << endl;
+					//cout << *i << endl;
+					//cout << "Inserting daily data for a stock into table PairOnePrices ..." << endl << endl;
 					char sql_Insert[512];
 					sprintf_s(sql_Insert, "INSERT INTO PairOnePrices(symbol, date, open, high, low, close, adjusted_close, volume) VALUES(\"%s\", \"%s\", %f, %f, %f, %f, %f, %d)", (*j).c_str(), i->GetDate().c_str(), i->GetOpen(), i->GetHigh(), i->GetLow(), i->GetClose(), i->GetAdjClose(), i->GetVolume());
 					if (ExecuteSQL(db, sql_Insert) == -1)
@@ -247,14 +263,16 @@ int main(void)
 				const vector<TradeData> dailyTrades = stockMap[*j].GetTrades();
 				for (auto i = dailyTrades.begin(); i != dailyTrades.end(); ++i) {
 
-					cout << *i << endl;
-					cout << "Inserting daily data for a stock into table PairTwoPrices ..." << endl << endl;
+					//cout << *i << endl;
+					//cout << "Inserting daily data for a stock into table PairTwoPrices ..." << endl << endl;
 					char sql_Insert[512];
 					sprintf_s(sql_Insert, "INSERT INTO PairTwoPrices(symbol, date, open, high, low, close, adjusted_close, volume) VALUES(\"%s\", \"%s\", %f, %f, %f, %f, %f, %d)", (*j).c_str(), i->GetDate().c_str(), i->GetOpen(), i->GetHigh(), i->GetLow(), i->GetClose(), i->GetAdjClose(), i->GetVolume());
 					if (ExecuteSQL(db, sql_Insert) == -1)
 						return -1;
 				}
 			}
+			sqlite3_exec(db, "END TRANSACTION", NULL, NULL, &sErrMsg);
+			printf("Imported  records in %4.2f seconds\n", (clock() - cStartClock) / (double)CLOCKS_PER_SEC);
 			// Pop Data into stockPair
 			for (int i = 0; i < symbolVec1.size(); i++)
 			{
